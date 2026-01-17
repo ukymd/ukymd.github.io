@@ -338,7 +338,7 @@ class MazeGenerator {
     _buildExitZones() {
         this.exitZones = [];
 
-        // Exit scores matching reference: 500, 100, 1000, 0, 250
+        // Exit scores - will be shuffled each level
         const exitScores = [
             { score: 500, color: '#4ade80', label: '500' },
             { score: 100, color: '#60a5fa', label: '100' },
@@ -346,6 +346,9 @@ class MazeGenerator {
             { score: 0, color: '#94a3b8', label: '0' },
             { score: 250, color: '#f472b6', label: '250' }
         ];
+
+        // Shuffle exit scores for each level (using RNG for consistency)
+        const shuffled = this.rng.shuffle(exitScores);
 
         // Create zones based on exit columns
         const zoneWidth = this.width / 5;
@@ -358,9 +361,9 @@ class MazeGenerator {
                 y: this.height,
                 width: zoneWidth,
                 height: EXIT_CONFIG.zoneHeight,
-                score: exitScores[i].score,
-                color: exitScores[i].color,
-                label: exitScores[i].label,
+                score: shuffled[i].score,
+                color: shuffled[i].color,
+                label: shuffled[i].label,
                 column: this.exitColumns[i] || Math.floor((i + 0.5) * this.cols / 5)
             });
         }

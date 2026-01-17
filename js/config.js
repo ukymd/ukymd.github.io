@@ -40,31 +40,20 @@ const PHYSICS_CONFIG = {
  * @constant {Object}
  */
 const LEVEL_CONFIG = {
-    /** Maximum level number */
-    maxLevel: 10,
+    /** Maximum level number (Infinity for endless mode) */
+    maxLevel: Infinity,
 
     /** Ball count by level range */
     ballCounts: {
-        low: 1,      // Levels 1-5
-        high: 1      // Levels 6-10
+        low: 1,      // All levels use 1 ball
+        high: 1
     },
 
     /** Level at which ball count increases */
     ballCountThreshold: 5,
 
-    /** Target scores for each level (fixed at 1000) */
-    targetScores: {
-        1: 1000,
-        2: 1000,
-        3: 1000,
-        4: 1000,
-        5: 1000,
-        6: 1000,
-        7: 1000,
-        8: 1000,
-        9: 1000,
-        10: 1000
-    },
+    /** Target score (constant for all levels) */
+    targetScore: 1000,
 
     /** Base maze height in rows */
     baseMazeHeight: 10,
@@ -190,13 +179,12 @@ function getBallCount(level) {
 }
 
 /**
- * Get target score for a specific level
- * @param {number} level - Current level (1-10)
- * @returns {number} Target score to complete level
+ * Get target score for any level
+ * @param {number} level - Current level (any number)
+ * @returns {number} Target score (always 1000)
  */
 function getTargetScore(level) {
-    return LEVEL_CONFIG.targetScores[level] ||
-        LEVEL_CONFIG.targetScores[LEVEL_CONFIG.maxLevel];
+    return LEVEL_CONFIG.targetScore;
 }
 
 /**

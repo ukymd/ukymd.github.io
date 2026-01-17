@@ -204,7 +204,8 @@ class Game {
             window.MazeGenerator.getWallRects(),
             window.MazeGenerator.getExitZones(),
             mazeDimensions.width,
-            mazeDimensions.height
+            mazeDimensions.height,
+            mazeDimensions.ballRadius
         );
 
         // Set physics callbacks

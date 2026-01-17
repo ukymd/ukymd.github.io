@@ -145,29 +145,70 @@ class MazeGenerator {
     init(level, canvasWidth, canvasHeight) {
         this.level = level;
 
-        // Scale maze size based on level
-        this.cols = 11 + Math.floor(level / 2) * 2; // Always odd for maze algo
-        this.rows = 13 + Math.floor(level / 3) * 2; // Always odd
+        // Detect orientation
+        const isLandscape = canvasWidth > canvasHeight;
+
+        // Calculate margins based on orientation
+        const exitZoneHeight = EXIT_CONFIG.zoneHeight;
+        let marginLeft, marginRight, marginTop, marginBottom;
+
+        if (isLandscape) {
+            // Landscape: HUD on left side
+            marginLeft = 120;  // Space for HUD on left
+            marginRight = 20;
+            marginTop = 20;
+            marginBottom = 100; // Space for buttons at bottom
+        } else {
+            // Portrait: HUD on top
+            marginLeft = 20;
+            marginRight = 20;
+            marginTop = 100;   // Space for HUD at top
+            marginBottom = 100; // Space for buttons at bottom
+        }
+
+        // Calculate available space
+        const availableWidth = canvasWidth - marginLeft - marginRight;
+        const availableHeight = canvasHeight - marginTop - marginBottom - exitZoneHeight;
+
+        // Scale maze complexity based on level, but cap it
+        let targetCols = Math.min(21, 11 + Math.floor(level / 3) * 2); // Cap at 21 cols
+        let targetRows = Math.min(25, 13 + Math.floor(level / 4) * 2); // Cap at 25 rows
 
         // Ensure odd dimensions for maze algorithm
-        if (this.cols % 2 === 0) this.cols++;
-        if (this.rows % 2 === 0) this.rows++;
+        if (targetCols % 2 === 0) targetCols++;
+        if (targetRows % 2 === 0) targetRows++;
 
-        // Calculate cell size to fit canvas (leave room for exit zones)
-        const exitZoneHeight = EXIT_CONFIG.zoneHeight;
-        const availableHeight = canvasHeight - exitZoneHeight - 40;
-
-        this.cellSize = Math.floor(Math.min(
-            (canvasWidth - 40) / this.cols,
-            availableHeight / this.rows
+        // Calculate cell size that would fit target dimensions
+        const minCellSize = 16; // Minimum for playability
+        let cellSize = Math.floor(Math.min(
+            availableWidth / targetCols,
+            availableHeight / targetRows
         ));
 
-        // Minimum cell size for playability
-        this.cellSize = Math.max(this.cellSize, 20);
+        // If cell size is too small, reduce grid size to fit
+        if (cellSize < minCellSize) {
+            cellSize = minCellSize;
+            // Reduce cols/rows to fit within available space
+            targetCols = Math.floor(availableWidth / cellSize);
+            targetRows = Math.floor(availableHeight / cellSize);
+            // Ensure odd and minimum
+            if (targetCols % 2 === 0) targetCols--;
+            if (targetRows % 2 === 0) targetRows--;
+            targetCols = Math.max(9, targetCols);
+            targetRows = Math.max(9, targetRows);
+        }
 
-        // Calculate maze dimensions
+        this.cols = targetCols;
+        this.rows = targetRows;
+        this.cellSize = cellSize;
+
+        // Calculate maze dimensions (MUST fit within available space)
         this.width = this.cols * this.cellSize;
         this.height = this.rows * this.cellSize;
+
+        // Store margins for renderer to use
+        this.marginLeft = marginLeft;
+        this.marginTop = marginTop;
 
         // Generate maze
         this.rng = new SeededRandom(Date.now());
@@ -404,15 +445,21 @@ class MazeGenerator {
 
     /**
      * Get maze dimensions
-     * @returns {Object} Width, height, and cell size
+     * @returns {Object} Width, height, cell size, and ball radius
      */
     getDimensions() {
+        // Ball radius should be about 35% of cell size to fit through corridors
+        const ballRadius = Math.max(5, Math.floor(this.cellSize * 0.35));
+
         return {
             width: this.width,
             height: this.height,
             cellSize: this.cellSize,
             cols: this.cols,
-            rows: this.rows
+            rows: this.rows,
+            ballRadius: ballRadius,
+            marginLeft: this.marginLeft || 20,
+            marginTop: this.marginTop || 20
         };
     }
 

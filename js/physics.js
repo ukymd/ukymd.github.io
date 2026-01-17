@@ -25,8 +25,9 @@ class Ball {
      * @param {number} x - Initial X position
      * @param {number} y - Initial Y position
      * @param {number} index - Ball index for color assignment
+     * @param {number} radius - Ball radius
      */
-    constructor(x = 0, y = 0, index = 0) {
+    constructor(x = 0, y = 0, index = 0, radius = null) {
         /** @type {number} X position */
         this.x = x;
 
@@ -40,7 +41,7 @@ class Ball {
         this.vy = 0;
 
         /** @type {number} Ball radius */
-        this.radius = PHYSICS_CONFIG.ballRadius;
+        this.radius = radius || PHYSICS_CONFIG.ballRadius;
 
         /** @type {number} Ball index for color */
         this.index = index;
@@ -150,18 +151,20 @@ class PhysicsEngine {
      * @param {Object[]} exitZones - Exit zones
      * @param {number} mazeWidth - Maze width
      * @param {number} mazeHeight - Maze height
+     * @param {number} ballRadius - Ball radius for this level
      */
-    init(spawnPositions, walls, exitZones, mazeWidth, mazeHeight) {
+    init(spawnPositions, walls, exitZones, mazeWidth, mazeHeight, ballRadius = null) {
         this.balls = [];
         this.score = 0;
         this.walls = walls;
         this.exitZones = exitZones;
         this.mazeWidth = mazeWidth;
         this.mazeHeight = mazeHeight;
+        this.ballRadius = ballRadius || PHYSICS_CONFIG.ballRadius;
 
         // Create balls at spawn positions
         spawnPositions.forEach((pos, index) => {
-            this.balls.push(new Ball(pos.x, pos.y, index));
+            this.balls.push(new Ball(pos.x, pos.y, index, this.ballRadius));
         });
     }
 

@@ -131,16 +131,31 @@ class Renderer {
     _calculateOffsets() {
         if (!this.mazeDimensions) return;
 
-        // Always center maze on full screen
+        // Get margins from maze (already calculated based on orientation)
+        const marginLeft = this.mazeDimensions.marginLeft || 20;
+        const marginTop = this.mazeDimensions.marginTop || 20;
+
+        // Total maze height including exit zones
         const totalHeight = this.mazeDimensions.height + EXIT_CONFIG.zoneHeight;
 
-        // Center maze horizontally and vertically
-        this.offsetX = (this.width - this.mazeDimensions.width) / 2;
-        this.offsetY = (this.height - totalHeight) / 2;
+        // Detect orientation
+        const isLandscape = this.width > this.height;
 
-        // Ensure offsets are reasonable (minimum 10px margin)
-        this.offsetX = Math.max(10, this.offsetX);
-        this.offsetY = Math.max(10, this.offsetY);
+        if (isLandscape) {
+            // Landscape: HUD on left, center maze in remaining space
+            const availableWidth = this.width - marginLeft;
+            this.offsetX = marginLeft + (availableWidth - this.mazeDimensions.width) / 2;
+            this.offsetY = (this.height - totalHeight) / 2;
+        } else {
+            // Portrait: HUD on top, center maze below
+            const availableHeight = this.height - marginTop;
+            this.offsetX = (this.width - this.mazeDimensions.width) / 2;
+            this.offsetY = marginTop + (availableHeight - totalHeight) / 2;
+        }
+
+        // Ensure offsets keep maze on screen
+        this.offsetX = Math.max(isLandscape ? marginLeft : 10, this.offsetX);
+        this.offsetY = Math.max(isLandscape ? 10 : marginTop, this.offsetY);
     }
 
     /**
